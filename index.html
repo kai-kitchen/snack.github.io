@@ -18,49 +18,49 @@
             --calendar-header: #f5f5f5;
             --calendar-today: #e3f2fd;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: #f4f7fc;
             color: var(--dark);
             line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
-        
+
         header {
             background: linear-gradient(135deg, var(--primary), #304fca);
             color: white;
             padding: 20px 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        
+
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .logo {
             font-size: 24px;
             font-weight: bold;
         }
-        
+
         .cart-icon {
             position: relative;
             cursor: pointer;
         }
-        
+
         .cart-count {
             position: absolute;
             top: -10px;
@@ -75,13 +75,13 @@
             justify-content: center;
             font-size: 12px;
         }
-        
+
         .tabs {
             display: flex;
             margin: 20px 0;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .tab {
             padding: 10px 20px;
             cursor: pointer;
@@ -91,36 +91,32 @@
             border-radius: 5px 5px 0 0;
             margin-right: 5px;
         }
-        
+
         .tab.active {
             background: white;
             font-weight: bold;
             color: var(--primary);
         }
-        
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
-        .products-section {
+
+        .products-section, .calendar-section, .add-product-section {
             padding: 20px 0;
         }
-        
-        .calendar-section {
-            padding: 20px 0;
-        }
-        
+
         .section-title {
             text-align: center;
             margin-bottom: 30px;
             color: var(--dark);
             position: relative;
         }
-        
+
         .section-title::after {
             content: '';
             display: block;
@@ -129,26 +125,27 @@
             background-color: var(--primary);
             margin: 10px auto;
         }
-        
+
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 25px;
         }
-        
+
         .product-card {
             background: white;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s, box-shadow 0.3s;
+            position: relative; /* Penting untuk posisi absolut ikon */
         }
-        
+
         .product-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .product-image {
             height: 200px;
             background-color: #f5f5f5;
@@ -157,36 +154,36 @@
             justify-content: center;
             overflow: hidden;
         }
-        
+
         .product-image img {
             max-width: 100%;
             max-height: 100%;
             object-fit: cover;
         }
-        
+
         .product-info {
             padding: 20px;
         }
-        
+
         .product-title {
             font-size: 18px;
             margin-bottom: 10px;
             color: var(--dark);
         }
-        
+
         .product-price {
             font-size: 20px;
             font-weight: bold;
             color: var(--primary);
             margin-bottom: 15px;
         }
-        
+
         .quantity-controls {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
         }
-        
+
         .quantity-btn {
             width: 30px;
             height: 30px;
@@ -199,7 +196,7 @@
             cursor: pointer;
             font-weight: bold;
         }
-        
+
         .quantity-input {
             width: 40px;
             height: 30px;
@@ -208,7 +205,7 @@
             margin: 0 5px;
             border-radius: 4px;
         }
-        
+
         .add-to-cart {
             width: 100%;
             padding: 10px;
@@ -220,23 +217,84 @@
             font-weight: bold;
             transition: background-color 0.3s;
         }
-        
+
         .add-to-cart:hover {
             background-color: #3a5bc9;
         }
-        
-        .cart-section {
+
+        /* Cart Popup Styles */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .cart-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .cart-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9); /* Initial scale for animation */
             background: white;
             border-radius: 10px;
             padding: 25px;
-            margin-top: 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh; /* Limit height for scrollability */
+            overflow-y: auto; /* Enable scrolling for long carts */
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
         }
-        
+
+        .cart-popup.active {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .cart-popup .section-title {
+            margin-top: 0; /* Override default section-title margin */
+            margin-bottom: 20px;
+        }
+
+        .cart-popup .section-title::after {
+            margin: 5px auto; /* Adjust line position */
+        }
+
+        .close-cart-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+            transition: color 0.2s;
+        }
+
+        .close-cart-btn:hover {
+            color: var(--dark);
+        }
+
         .cart-items {
             margin-bottom: 20px;
         }
-        
+
         .cart-item {
             display: flex;
             justify-content: space-between;
@@ -244,49 +302,49 @@
             padding: 15px 0;
             border-bottom: 1px solid #eee;
         }
-        
+
         .cart-item-info {
             flex: 1;
         }
-        
+
         .cart-item-title {
             font-weight: bold;
             margin-bottom: 5px;
         }
-        
+
         .cart-item-price {
             color: var(--primary);
             font-weight: bold;
         }
-        
+
         .cart-item-quantity {
             display: flex;
             align-items: center;
         }
-        
+
         .cart-summary {
             border-top: 2px solid #eee;
             padding-top: 20px;
         }
-        
+
         .summary-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
         }
-        
+
         .total {
             font-size: 20px;
             font-weight: bold;
             color: var(--dark);
         }
-        
+
         .total-price {
             font-size: 20px;
             font-weight: bold;
             color: var(--primary);
         }
-        
+
         .checkout-btn {
             width: 100%;
             padding: 15px;
@@ -299,17 +357,17 @@
             margin-top: 20px;
             transition: background-color 0.3s;
         }
-        
+
         .checkout-btn:hover {
             background-color: #218838;
         }
-        
+
         .empty-cart {
             text-align: center;
             color: var(--gray);
             padding: 20px 0;
         }
-        
+
         /* Calendar Styles */
         .calendar-container {
             background: var(--calendar-bg);
@@ -318,7 +376,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             margin-bottom: 30px;
         }
-        
+
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -327,13 +385,13 @@
             background: var(--calendar-header);
             border-bottom: 1px solid var(--calendar-border);
         }
-        
+
         .calendar-nav {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .calendar-nav-btn {
             background: var(--primary);
             color: white;
@@ -346,33 +404,33 @@
             justify-content: center;
             cursor: pointer;
         }
-        
+
         .calendar-month {
             font-size: 18px;
             font-weight: bold;
         }
-        
+
         .calendar-weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             background: var(--calendar-header);
             border-bottom: 1px solid var(--calendar-border);
         }
-        
+
         .calendar-weekday {
             text-align: center;
             padding: 10px;
             font-weight: bold;
             color: var(--dark);
         }
-        
+
         .calendar-days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
             background: var(--calendar-border);
         }
-        
+
         .calendar-day {
             background: white;
             min-height: 80px;
@@ -381,78 +439,78 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        
+
         .calendar-day:hover {
             background: #f9f9f9;
         }
-        
+
         .calendar-day.empty {
             background: #f9f9f9;
             cursor: default;
         }
-        
+
         .calendar-day.today {
             background: var(--calendar-today);
         }
-        
+
         .day-number {
             font-size: 14px;
             margin-bottom: 5px;
         }
-        
+
         .sales-data {
             font-size: 12px;
             color: var(--primary);
         }
-        
+
         .sales-standard {
             color: var(--primary);
         }
-        
+
         .sales-premium {
             color: var(--secondary);
         }
-        
+
         .sales-total {
             font-weight: bold;
             margin-top: 3px;
             padding-top: 3px;
             border-top: 1px dashed #eee;
         }
-        
+
         .calendar-summary {
             background: white;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
-        
+
         .summary-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
-        
+
         .stat-card {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 15px;
             text-align: center;
         }
-        
+
         .stat-value {
             font-size: 24px;
             font-weight: bold;
             color: var(--primary);
             margin-bottom: 5px;
         }
-        
+
         .stat-label {
             font-size: 14px;
             color: var(--gray);
         }
-        
+
         .chart-container {
             margin-top: 20px;
             height: 200px;
@@ -463,7 +521,7 @@
             align-items: flex-end;
             gap: 10px;
         }
-        
+
         .chart-bar {
             background: var(--primary);
             border-radius: 4px 4px 0 0;
@@ -471,7 +529,7 @@
             flex: 1;
             transition: height 0.5s;
         }
-        
+
         .chart-bar-label {
             position: absolute;
             bottom: -25px;
@@ -480,7 +538,7 @@
             text-align: center;
             font-size: 12px;
         }
-        
+
         .chart-bar-value {
             position: absolute;
             top: -25px;
@@ -490,19 +548,191 @@
             font-size: 12px;
             font-weight: bold;
         }
-        
+
+        /* Add Product Form Styles */
+        .add-product-form {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group input[type="file"] { /* Added file input */
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group select:focus,
+        .form-group input[type="file"]:focus { /* Added file input */
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%20viewBox%3D%220%200%20292.4%20292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2C114.7L159.7%2C27.3c-3.9-3.9-10.1-3.9-14%2C0L5.4%2C114.7c-3.9%2C3.9-3.9%2C10.1%2C0%2C14l14%2C14c3.9%2C3.9%2C10.1%2C3.9%2C14%2C0l104.4-104.4l104.4%2C104.4c3.9%2C3.9%2C10.1%2C3.9%2C14%2C0l14-14C290.9%2C124.8%2C290.9%2C118.6%2C287%2C114.7z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 12px auto;
+        }
+
+        .add-product-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .add-product-btn:hover {
+            background-color: #3a5bc9;
+        }
+
+        /* Toast Notification */
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Search Bar for Calendar */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-controls .search-bar {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .calendar-controls .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* Product Search Bar */
+        .product-search-bar {
+            margin-bottom: 20px;
+        }
+
+        .product-search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* New Delete Icon for Product Card */
+        .delete-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .delete-icon:hover {
+            background-color: #e05a5a;
+            transform: scale(1.1);
+        }
+
+        /* Hide the old delete product button */
+        .delete-product-btn {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .products-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
-            
+
             .calendar-day {
                 min-height: 60px;
                 padding: 5px;
             }
-            
+
             .sales-data {
                 font-size: 10px;
+            }
+
+            .calendar-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .calendar-controls .search-bar {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+
+            .cart-popup {
+                width: 95%;
+                padding: 15px;
+            }
+            .close-cart-btn {
+                font-size: 20px;
+                top: 10px;
+                right: 10px;
             }
         }
     </style>
@@ -512,7 +742,7 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">TokoOnline</div>
-                <div class="cart-icon">
+                <div class="cart-icon" id="cart-icon-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
@@ -527,50 +757,69 @@
     <main class="container">
         <div class="tabs">
             <div class="tab active" data-tab="products">Produk</div>
+            <div class="tab" data-tab="add-product">Tambah Produk Baru</div>
             <div class="tab" data-tab="calendar">Kalender Penjualan</div>
         </div>
-        
+
         <div class="tab-content active" id="products-tab">
             <section class="products-section">
                 <h2 class="section-title">Produk Kami</h2>
-                
+
+                <div class="product-search-bar">
+                    <input type="text" id="product-search" placeholder="Cari produk...">
+                </div>
+
                 <div class="products-grid" id="products-grid">
                     <!-- Products will be loaded here from Firebase -->
                 </div>
             </section>
-            
-            <section class="cart-section">
-                <h2 class="section-title">Keranjang Belanja</h2>
-                
-                <div class="cart-items">
-                    <div class="empty-cart">Keranjang belanja masih kosong</div>
-                    <!-- Item keranjang akan ditambahkan secara dinamis -->
-                </div>
-                
-                <div class="cart-summary">
-                    <div class="summary-row">
-                        <span class="total">Total</span>
-                        <span class="total-price">Rp 0</span>
+        </div>
+
+        <div class="tab-content" id="add-product-tab">
+            <section class="add-product-section">
+                <h2 class="section-title">Tambah Produk Baru</h2>
+                <form id="add-product-form" class="add-product-form">
+                    <div class="form-group">
+                        <label for="product-name">Nama Produk:</label>
+                        <input type="text" id="product-name" placeholder="Masukkan nama produk" required>
                     </div>
-                    
-                    <button class="checkout-btn">Checkout</button>
-                </div>
+                    <!-- Input Harga disembunyikan, tapi nilainya diatur otomatis -->
+                    <input type="hidden" id="product-price" value="0">
+                    <div class="form-group">
+                        <label for="product-type">Tipe Produk:</label>
+                        <select id="product-type" required onchange="updateProductPrice()">
+                            <option value="standard">Standard</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-image-upload">Upload Foto Produk:</label>
+                        <input type="file" id="product-image-upload" accept="image/*">
+                    </div>
+                    <button type="submit" class="add-product-btn">Tambahkan Produk</button>
+                </form>
             </section>
         </div>
-        
+
         <div class="tab-content" id="calendar-tab">
             <section class="calendar-section">
                 <h2 class="section-title">Kalender Penjualan</h2>
-                
+
+                <div class="calendar-controls">
+                    <div class="search-bar">
+                        <input type="text" id="calendar-search" placeholder="Cari penjualan berdasarkan tanggal (YYYY-MM-DD)">
+                    </div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" id="prev-month">&lt;</button>
+                        <button class="calendar-nav-btn" id="next-month">&gt;</button>
+                    </div>
+                </div>
+
                 <div class="calendar-container">
                     <div class="calendar-header">
-                        <div class="calendar-nav">
-                            <button class="calendar-nav-btn" id="prev-month">&lt;</button>
-                            <button class="calendar-nav-btn" id="next-month">&gt;</button>
-                        </div>
                         <div class="calendar-month">April 2023</div>
                     </div>
-                    
+
                     <div class="calendar-weekdays">
                         <div class="calendar-weekday">Minggu</div>
                         <div class="calendar-weekday">Senin</div>
@@ -580,15 +829,15 @@
                         <div class="calendar-weekday">Jumat</div>
                         <div class="calendar-weekday">Sabtu</div>
                     </div>
-                    
+
                     <div class="calendar-days" id="calendar-days">
                         <!-- Calendar days will be generated here -->
                     </div>
                 </div>
-                
+
                 <div class="calendar-summary">
                     <h3>Ringkasan Penjualan Bulanan</h3>
-                    
+
                     <div class="summary-stats">
                         <div class="stat-card">
                             <div class="stat-value" id="total-sales">0</div>
@@ -607,7 +856,7 @@
                             <div class="stat-label">Total Pendapatan</div>
                         </div>
                     </div>
-                    
+
                     <h4>Statistik Harian</h4>
                     <div class="chart-container" id="sales-chart">
                         <!-- Chart will be generated here -->
@@ -617,11 +866,36 @@
         </div>
     </main>
 
+    <div id="toast-notification" class="toast-notification"></div>
+
+    <!-- Pop-up Keranjang Belanja -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <section class="cart-popup" id="cart-popup">
+        <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+        <h2 class="section-title">Keranjang Belanja</h2>
+
+        <div class="cart-items">
+            <div class="empty-cart">Keranjang belanja masih kosong</div>
+            <!-- Item keranjang akan ditambahkan secara dinamis -->
+        </div>
+
+        <div class="cart-summary">
+            <div class="summary-row">
+                <span class="total">Total</span>
+                <span class="total-price">Rp 0</span>
+            </div>
+
+            <button class="checkout-btn">Checkout</button>
+        </div>
+    </section>
+
     <!-- Firebase SDK (Modular v9+) -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
+
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -636,6 +910,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app); // Get Firestore instance
+        const storage = getStorage(app); // Get Storage instance
 
         document.addEventListener('DOMContentLoaded', function() {
             // Inisialisasi keranjang
@@ -645,22 +920,84 @@
             const cartCountElement = document.querySelector('.cart-count');
             const checkoutBtn = document.querySelector('.checkout-btn');
             const productsGrid = document.getElementById('products-grid');
-            
+            const addProductForm = document.getElementById('add-product-form');
+            const productPriceInput = document.getElementById('product-price'); // Hidden input
+            const productTypeSelect = document.getElementById('product-type');
+            const productImageUpload = document.getElementById('product-image-upload');
+            const productSearchInput = document.getElementById('product-search');
+            const cartIconBtn = document.getElementById('cart-icon-btn'); // Cart icon button
+
+            // New: Cart popup elements
+            const cartPopup = document.getElementById('cart-popup');
+            const cartOverlay = document.getElementById('cart-overlay');
+            const closeCartBtn = document.getElementById('close-cart-btn');
+
             // Data penjualan (disimpan di localStorage)
             let salesData = JSON.parse(localStorage.getItem('salesData')) || {};
-            
+
             // Kalender
             let currentDate = new Date();
             const calendarDays = document.getElementById('calendar-days');
             const calendarMonthElement = document.querySelector('.calendar-month');
             const prevMonthBtn = document.getElementById('prev-month');
             const nextMonthBtn = document.getElementById('next-month');
-            
+            const calendarSearchInput = document.getElementById('calendar-search');
+
             // Tabs
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
 
-            // Fungsi untuk menambahkan contoh produk ke Firestore
+            // Toast Notification
+            const toastNotification = document.getElementById('toast-notification');
+
+            // Helper function to format currency
+            function formatRupiah(number) {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(number);
+            }
+
+            // Function to show toast notification
+            function showToast(message) {
+                toastNotification.textContent = message;
+                toastNotification.classList.add('show');
+                setTimeout(() => {
+                    toastNotification.classList.remove('show');
+                }, 3000); // Hide after 3 seconds
+            }
+
+            // Global function for product price update (accessible from HTML)
+            window.updateProductPrice = function() {
+                const selectedType = productTypeSelect.value;
+                if (selectedType === 'standard') {
+                    productPriceInput.value = 8000;
+                } else if (selectedType === 'premium') {
+                    productPriceInput.value = 15000;
+                }
+            };
+
+            // Fungsi untuk menampilkan/menyembunyikan pop-up keranjang
+            function toggleCartPopup() {
+                cartPopup.classList.toggle('active');
+                cartOverlay.classList.toggle('active');
+                // Nonaktifkan scrolling body saat pop-up aktif
+                document.body.style.overflow = cartPopup.classList.contains('active') ? 'hidden' : '';
+            }
+
+            // Event listener untuk ikon keranjang (membuka pop-up)
+            cartIconBtn.addEventListener('click', toggleCartPopup);
+
+            // Event listener untuk tombol tutup pop-up
+            closeCartBtn.addEventListener('click', toggleCartPopup);
+
+            // Event listener untuk overlay (menutup pop-up saat klik di luar)
+            cartOverlay.addEventListener('click', toggleCartPopup);
+
+
+            // Fungsi untuk menambahkan contoh produk ke Firestore (hanya jika kosong)
             async function addExampleProducts() {
                 const productsColRef = collection(db, 'products');
                 const snapshot = await getDocs(productsColRef);
@@ -668,16 +1005,11 @@
                 if (snapshot.empty) {
                     console.log("Adding example products to Firestore...");
                     const exampleProducts = [
-                        { name: "Produk Standard A", price: 8000, type: "standard", icon: "rect" },
-                        { name: "Produk Standard B", price: 8500, type: "standard", icon: "rect" },
-                        { name: "Produk Standard C", price: 7800, type: "standard", icon: "rect" },
-                        { name: "Produk Standard D", price: 9000, type: "standard", icon: "rect" },
-                        { name: "Produk Standard E", price: 8200, type: "standard", icon: "rect" },
-                        { name: "Produk Premium F", price: 15000, type: "premium", icon: "star" },
-                        { name: "Produk Premium G", price: 16500, type: "premium", icon: "star" },
-                        { name: "Produk Premium H", price: 14800, type: "premium", icon: "star" },
-                        { name: "Produk Premium I", price: 17000, type: "premium", icon: "star" },
-                        { name: "Produk Premium J", price: 15500, type: "premium", icon: "star" }
+                        { name: "Produk Standard A", price: 8000, type: "standard", imageUrl: "https://via.placeholder.com/200x200?text=Standard+A" },
+                        { name: "Produk Standard B", price: 8500, type: "standard", imageUrl: "https://via.placeholder.com/200x200?text=Standard+B" },
+                        { name: "Produk Standard C", price: 7800, type: "standard", imageUrl: "https://via.placeholder.com/200x200?text=Standard+C" },
+                        { name: "Produk Premium F", price: 15000, type: "premium", imageUrl: "https://via.placeholder.com/200x200?text=Premium+F" },
+                        { name: "Produk Premium G", price: 16500, type: "premium", imageUrl: "https://via.placeholder.com/200x200?text=Premium+G" }
                     ];
 
                     const batch = writeBatch(db);
@@ -693,7 +1025,7 @@
             }
 
             // Fungsi untuk memuat produk dari Firebase
-            async function loadProducts() {
+            async function loadProducts(searchTerm = '') {
                 productsGrid.innerHTML = ''; // Clear existing products
                 const productsColRef = collection(db, 'products');
                 const snapshot = await getDocs(productsColRef);
@@ -703,34 +1035,44 @@
                     return;
                 }
 
+                const products = [];
                 snapshot.forEach(doc => {
-                    const product = doc.data();
-                    const productId = doc.id; // Get the document ID
-                    const iconSvg = product.icon === 'rect' ? 
-                        `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#4a6bdf" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <path d="M21 15l-5-5L5 21"></path>
-                        </svg>` :
-                        `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>`;
+                    products.push({ id: doc.id, ...doc.data() });
+                });
 
+                const filteredProducts = products.filter(product =>
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                if (filteredProducts.length === 0) {
+                    productsGrid.innerHTML = '<p>Tidak ada produk yang cocok dengan pencarian Anda.</p>';
+                    return;
+                }
+
+                filteredProducts.forEach(product => {
                     const productCard = document.createElement('div');
                     productCard.classList.add('product-card');
                     productCard.innerHTML = `
+                        <div class="delete-icon" data-id="${product.id}" data-image-url="${product.imageUrl || ''}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </div>
                         <div class="product-image">
-                            ${iconSvg}
+                            <img src="${product.imageUrl || 'https://via.placeholder.com/200x200?text=No+Image'}" alt="${product.name}">
                         </div>
                         <div class="product-info">
                             <h3 class="product-title">${product.name}</h3>
-                            <div class="product-price">Rp ${product.price.toLocaleString('id-ID')}</div>
+                            <div class="product-price">${formatRupiah(product.price)}</div>
                             <div class="quantity-controls">
-                                <button class="quantity-btn minus" data-id="${productId}" data-price="${product.price}">-</button>
-                                <input type="number" class="quantity-input" value="0" min="0" data-id="${productId}" data-price="${product.price}">
-                                <button class="quantity-btn plus" data-id="${productId}" data-price="${product.price}">+</button>
+                                <button class="quantity-btn minus" data-id="${product.id}" data-price="${product.price}">-</button>
+                                <input type="number" class="quantity-input" value="0" min="0" data-id="${product.id}" data-price="${product.price}">
+                                <button class="quantity-btn plus" data-id="${product.id}" data-price="${product.price}">+</button>
                             </div>
-                            <button class="add-to-cart" data-id="${productId}" data-name="${product.name}" data-price="${product.price}">Tambah ke Keranjang</button>
+                            <button class="add-to-cart" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" data-type="${product.type}">Tambah ke Keranjang</button>
+                            <!-- Tombol hapus yang lama disembunyikan via CSS -->
+                            <!-- <button class="delete-product-btn" data-id="${product.id}" data-image-url="${product.imageUrl || ''}">Hapus Produk</button> -->
                         </div>
                     `;
                     productsGrid.appendChild(productCard);
@@ -746,111 +1088,149 @@
                     button.removeEventListener('click', handleQuantityChange); // Prevent duplicate listeners
                     button.addEventListener('click', handleQuantityChange);
                 });
-                
+
                 document.querySelectorAll('.add-to-cart').forEach(button => {
                     button.removeEventListener('click', handleAddToCart); // Prevent duplicate listeners
                     button.addEventListener('click', handleAddToCart);
+                });
+
+                // Event listener untuk ikon hapus yang baru
+                document.querySelectorAll('.delete-icon').forEach(icon => {
+                    icon.removeEventListener('click', handleDeleteProduct); // Prevent duplicate listeners
+                    icon.addEventListener('click', handleDeleteProduct);
                 });
             }
 
             function handleQuantityChange() {
                 const input = this.parentElement.querySelector('.quantity-input');
                 let value = parseInt(input.value);
-                
+
                 if (this.classList.contains('plus')) {
                     value++;
                 } else if (this.classList.contains('minus') && value > 0) {
                     value--;
                 }
-                
+
                 input.value = value;
             }
 
             function handleAddToCart() {
                 const name = this.getAttribute('data-name');
                 const price = parseInt(this.getAttribute('data-price'));
+                const type = this.getAttribute('data-type'); // Get product type
                 const quantityInput = this.parentElement.querySelector('.quantity-input');
                 const quantity = parseInt(quantityInput.value);
-                
+
                 if (quantity > 0) {
-                    addToCart(name, price, quantity);
+                    addToCart(name, price, quantity, type);
                     quantityInput.value = 0;
-                    
-                    alert(`${quantity} ${name} telah ditambahkan ke keranjang!`);
+
+                    showToast(`${quantity} ${name} telah ditambahkan ke keranjang!`);
                 } else {
-                    alert('Silakan pilih jumlah produk yang ingin dibeli.');
+                    showToast('Silakan pilih jumlah produk yang ingin dibeli.');
                 }
             }
-            
+
+            async function handleDeleteProduct() {
+                const productId = this.getAttribute('data-id');
+                const imageUrl = this.getAttribute('data-image-url');
+
+                if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                    try {
+                        // Delete image from Storage if it exists and is not a placeholder
+                        if (imageUrl && !imageUrl.includes('via.placeholder.com')) {
+                            const imageRef = ref(storage, imageUrl);
+                            await deleteObject(imageRef);
+                            console.log("Image deleted from Storage.");
+                        }
+
+                        // Delete product from Firestore
+                        await deleteDoc(doc(db, 'products', productId));
+                        showToast('Produk berhasil dihapus!');
+                        loadProducts(); // Reload products after deletion
+                    } catch (error) {
+                        console.error("Error deleting product: ", error);
+                        showToast("Gagal menghapus produk. Silakan coba lagi.");
+                    }
+                }
+            }
+
             // Fungsi untuk mengubah tab
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
-                    
+
                     // Hapus class active dari semua tab dan konten
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(tc => tc.classList.remove('active'));
-                    
+
                     // Tambahkan class active ke tab dan konten yang diklik
                     this.classList.add('active');
                     document.getElementById(`${tabId}-tab`).classList.add('active');
-                    
+
+                    // Sembunyikan pop-up keranjang saat berpindah tab
+                    if (cartPopup.classList.contains('active')) {
+                        toggleCartPopup();
+                    }
+
                     // Jika tab kalender dipilih, perbarui tampilan kalender
                     if (tabId === 'calendar') {
                         renderCalendar();
                         updateSalesSummary();
+                    } else if (tabId === 'products') {
+                        loadProducts(); // Reload products when returning to products tab
                     }
                 });
             });
-            
+
             // Fungsi untuk mengupdate tampilan keranjang
             function updateCartDisplay() {
                 // Kosongkan kontainer keranjang
                 cartItemsContainer.innerHTML = '';
-                
+
                 // Hitung total harga dan jumlah item
                 let total = 0;
                 let itemCount = 0;
-                
+
                 // Jika keranjang kosong
                 if (cart.length === 0) {
                     cartItemsContainer.innerHTML = '<div class="empty-cart">Keranjang belanja masih kosong</div>';
-                    totalPriceElement.textContent = 'Rp 0';
+                    totalPriceElement.textContent = formatRupiah(0);
                     cartCountElement.textContent = '0';
                     return;
                 }
-                
+
                 // Tampilkan setiap item dalam keranjang
                 cart.forEach(item => {
                     const itemTotal = item.price * item.quantity;
                     total += itemTotal;
                     itemCount += item.quantity;
-                    
+
                     const cartItemElement = document.createElement('div');
                     cartItemElement.classList.add('cart-item');
                     cartItemElement.innerHTML = `
                         <div class="cart-item-info">
                             <div class="cart-item-title">${item.name}</div>
-                            <div class="cart-item-price">Rp ${item.price.toLocaleString('id-ID')} x ${item.quantity}</div>
+                            <div class="cart-item-price">${formatRupiah(item.price)} x ${item.quantity}</div>
                         </div>
                         <div class="cart-item-quantity">
-                            <span class="cart-item-total">Rp ${itemTotal.toLocaleString('id-ID')}</span>
+                            <span class="cart-item-total">${formatRupiah(itemTotal)}</span>
                         </div>
                     `;
-                    
+
                     cartItemsContainer.appendChild(cartItemElement);
                 });
-                
+
                 // Update total harga dan jumlah item
-                totalPriceElement.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+                totalPriceElement.textContent = formatRupiah(total);
                 cartCountElement.textContent = itemCount;
             }
-            
+
             // Fungsi untuk menambah item ke keranjang
-            function addToCart(name, price, quantity) {
+            function addToCart(name, price, quantity, type) {
                 // Cek apakah item sudah ada di keranjang
                 const existingItemIndex = cart.findIndex(item => item.name === name && item.price === price);
-                
+
                 if (existingItemIndex !== -1) {
                     // Jika sudah ada, tambahkan jumlahnya
                     cart[existingItemIndex].quantity += quantity;
@@ -859,109 +1239,114 @@
                     cart.push({
                         name,
                         price,
-                        quantity
+                        quantity,
+                        type // Store product type in cart
                     });
                 }
-                
+
                 updateCartDisplay();
             }
-            
+
             // Fungsi untuk mencatat penjualan
             function recordSale(date, items) {
                 const dateKey = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-                
+
                 if (!salesData[dateKey]) {
                     salesData[dateKey] = {
                         standard: 0,
                         premium: 0
                     };
                 }
-                
+
                 items.forEach(item => {
-                    // Assuming standard products are around 8000 and premium around 15000
-                    if (item.price <= 10000) { // Heuristic to differentiate standard/premium
+                    if (item.type === 'standard') {
                         salesData[dateKey].standard += item.quantity;
-                    } else {
+                    } else if (item.type === 'premium') {
                         salesData[dateKey].premium += item.quantity;
                     }
                 });
-                
+
                 // Simpan ke localStorage
                 localStorage.setItem('salesData', JSON.stringify(salesData));
             }
-            
+
             // Fungsi untuk merender kalender
-            function renderCalendar() {
+            function renderCalendar(filterDate = null) {
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
-                
+
                 // Set judul bulan dan tahun
                 const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
                                     "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                 calendarMonthElement.textContent = `${monthNames[month]} ${year}`;
-                
+
                 // Kosongkan kalender
                 calendarDays.innerHTML = '';
-                
+
                 // Dapatkan hari pertama bulan ini
                 const firstDay = new Date(year, month, 1);
                 // Dapatkan hari terakhir bulan ini
                 const lastDay = new Date(year, month + 1, 0);
-                
+
                 // Hitung hari dari bulan sebelumnya untuk mengisi kekosongan
                 const startDay = firstDay.getDay(); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
-                
+
                 // Tambahkan hari dari bulan sebelumnya
                 for (let i = 0; i < startDay; i++) {
                     const emptyDay = document.createElement('div');
                     emptyDay.classList.add('calendar-day', 'empty');
                     calendarDays.appendChild(emptyDay);
                 }
-                
+
                 // Dapatkan hari ini untuk penanda
                 const today = new Date();
                 const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
-                
+
                 // Tambahkan hari dalam bulan
                 for (let day = 1; day <= lastDay.getDate(); day++) {
                     const dayElement = document.createElement('div');
-                    
+
                     // Format tanggal untuk kunci data
                     const date = new Date(year, month, day);
                     const dateKey = date.toISOString().split('T')[0];
-                    
+
                     // Cek apakah hari ini
                     if (isCurrentMonth && day === today.getDate()) {
                         dayElement.classList.add('calendar-day', 'today');
                     } else {
                         dayElement.classList.add('calendar-day');
                     }
-                    
+
+                    // Apply search filter
+                    if (filterDate && dateKey !== filterDate) {
+                        dayElement.style.display = 'none'; // Hide days not matching the search
+                    }
+
                     // Tambahkan nomor hari
                     const dayNumber = document.createElement('div');
                     dayNumber.classList.add('day-number');
                     dayNumber.textContent = day;
                     dayElement.appendChild(dayNumber);
-                    
+
                     // Tambahkan data penjualan jika ada
                     if (salesData[dateKey]) {
                         const salesInfo = document.createElement('div');
                         salesInfo.classList.add('sales-data');
-                        
+
                         if (salesData[dateKey].standard > 0) {
                             const standardSales = document.createElement('div');
                             standardSales.classList.add('sales-standard');
                             standardSales.textContent = `Standard: ${salesData[dateKey].standard}`;
                             salesInfo.appendChild(standardSales);
                         }
-                        
+
                         if (salesData[dateKey].premium > 0) {
                             const premiumSales = document.createElement('div');
                             premiumSales.classList.add('sales-premium');
                             premiumSales.textContent = `Premium: ${salesData[dateKey].premium}`;
                             salesInfo.appendChild(premiumSales);
                         }
-                        
+
                         const totalSales = salesData[dateKey].standard + salesData[dateKey].premium;
                         if (totalSales > 0) {
                             const totalElement = document.createElement('div');
@@ -969,134 +1354,208 @@
                             totalElement.textContent = `Total: ${totalSales}`;
                             salesInfo.appendChild(totalElement);
                         }
-                        
+
                         dayElement.appendChild(salesInfo);
                     }
-                    
+
                     calendarDays.appendChild(dayElement);
                 }
             }
-            
+
             // Fungsi untuk mengupdate ringkasan penjualan
-            function updateSalesSummary() {
+            async function updateSalesSummary() {
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
-                
+
                 let totalStandard = 0;
                 let totalPremium = 0;
                 let totalRevenue = 0;
-                
+
+                // Fetch product prices from Firebase to calculate accurate revenue
+                const productsColRef = collection(db, 'products');
+                const snapshot = await getDocs(productsColRef);
+                const productPrices = {};
+                snapshot.forEach(doc => {
+                    const product = doc.data();
+                    productPrices[product.name] = product.price;
+                });
+
                 // Hitung total penjualan untuk bulan ini
                 for (const dateKey in salesData) {
                     const date = new Date(dateKey);
                     if (date.getFullYear() === year && date.getMonth() === month) {
                         totalStandard += salesData[dateKey].standard;
                         totalPremium += salesData[dateKey].premium;
-                        // This part needs to be dynamic based on actual product prices from Firebase
-                        // For now, using the old hardcoded prices as a heuristic
+
+                        // To calculate revenue accurately, we need to know which products were sold
+                        // and their prices. Since salesData only stores counts by type,
+                        // we'll use a simplified approach or assume average prices for standard/premium.
+                        // For a more accurate calculation, salesData would need to store item-level details.
+                        // For now, we'll use the heuristic from the original code, but ideally,
+                        // this would be based on actual product prices from Firebase.
                         totalRevenue += (salesData[dateKey].standard * 8000) + (salesData[dateKey].premium * 15000);
                     }
                 }
-                
+
                 // Update ringkasan
                 document.getElementById('total-sales').textContent = totalStandard + totalPremium;
                 document.getElementById('total-standard').textContent = totalStandard;
                 document.getElementById('total-premium').textContent = totalPremium;
-                document.getElementById('total-revenue').textContent = `Rp ${totalRevenue.toLocaleString('id-ID')}`;
-                
+                document.getElementById('total-revenue').textContent = formatRupiah(totalRevenue);
+
                 // Buat chart
                 renderSalesChart();
             }
-            
+
             // Fungsi untuk merender chart penjualan
             function renderSalesChart() {
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
                 const chartContainer = document.getElementById('sales-chart');
-                
+
                 // Kosongkan chart
                 chartContainer.innerHTML = '';
-                
+
                 // Dapatkan jumlah hari dalam bulan
                 const lastDay = new Date(year, month + 1, 0).getDate();
-                
+
                 // Cari nilai maksimum untuk scaling
                 let maxSales = 0;
                 const dailySales = [];
-                
+
                 for (let day = 1; day <= lastDay; day++) {
                     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const sales = salesData[dateKey] || { standard: 0, premium: 0 };
                     const total = sales.standard + sales.premium;
                     dailySales.push(total);
-                    
+
                     if (total > maxSales) maxSales = total;
                 }
-                
+
                 // Jika tidak ada penjualan, set maxSales ke 1 untuk menghindari pembagian dengan nol
                 if (maxSales === 0) maxSales = 1;
-                
+
                 // Buat chart bars
                 for (let day = 1; day <= lastDay; day++) {
                     const sales = dailySales[day - 1] || 0;
                     const barHeight = (sales / maxSales) * 160; // 160px adalah tinggi maksimum bar
-                    
+
                     const bar = document.createElement('div');
                     bar.classList.add('chart-bar');
                     bar.style.height = `${barHeight}px`;
-                    
+
                     const valueLabel = document.createElement('div');
                     valueLabel.classList.add('chart-bar-value');
                     valueLabel.textContent = sales;
                     bar.appendChild(valueLabel);
-                    
+
                     const dayLabel = document.createElement('div');
                     dayLabel.classList.add('chart-bar-label');
                     dayLabel.textContent = day;
                     bar.appendChild(dayLabel);
-                    
+
                     chartContainer.appendChild(bar);
                 }
             }
-            
+
             // Event listener untuk tombol checkout
             checkoutBtn.addEventListener('click', function() {
                 if (cart.length === 0) {
-                    alert('Keranjang belanja masih kosong.');
+                    showToast('Keranjang belanja masih kosong.');
                     return;
                 }
-                
+
                 const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                
+
                 // Catat penjualan untuk hari ini
                 recordSale(new Date(), cart);
-                
-                alert(`Terima kasih telah berbelanja!\nTotal pembayaran: Rp ${total.toLocaleString('id-ID')}`);
-                
+
+                showToast(`Terima kasih telah berbelanja!\nTotal pembayaran: ${formatRupiah(total)}`);
+
                 // Kosongkan keranjang setelah checkout
                 cart = [];
                 updateCartDisplay();
+                updateSalesSummary(); // Update sales summary after checkout
+                toggleCartPopup(); // Tutup pop-up setelah checkout
             });
-            
+
             // Event listener untuk navigasi kalender
             prevMonthBtn.addEventListener('click', function() {
                 currentDate.setMonth(currentDate.getMonth() - 1);
                 renderCalendar();
                 updateSalesSummary();
             });
-            
+
             nextMonthBtn.addEventListener('click', function() {
                 currentDate.setMonth(currentDate.getMonth() + 1);
                 renderCalendar();
                 updateSalesSummary();
             });
-            
+
+            // Event listener for calendar search
+            calendarSearchInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(searchTerm)) {
+                    renderCalendar(searchTerm);
+                } else {
+                    renderCalendar(); // Render full month if search term is invalid or empty
+                }
+            });
+
+            // Event listener for product search
+            productSearchInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim();
+                loadProducts(searchTerm);
+            });
+
+            // Event listener for Add Product Form submission
+            addProductForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const productName = document.getElementById('product-name').value;
+                // Ambil harga dari input hidden
+                const productPrice = parseInt(productPriceInput.value);
+                const productType = document.getElementById('product-type').value;
+                const imageFile = productImageUpload.files[0];
+
+                if (!productName || isNaN(productPrice) || productPrice <= 0) {
+                    showToast('Nama produk harus diisi.'); // Pesan disesuaikan karena harga otomatis
+                    return;
+                }
+
+                try {
+                    let imageUrl = '';
+                    if (imageFile) {
+                        const storageRef = ref(storage, `product_images/${imageFile.name}`);
+                        const uploadTask = await uploadBytes(storageRef, imageFile);
+                        imageUrl = await getDownloadURL(uploadTask.ref);
+                        console.log("Image uploaded:", imageUrl);
+                    }
+
+                    const productsColRef = collection(db, 'products');
+                    await addDoc(productsColRef, {
+                        name: productName,
+                        price: productPrice,
+                        type: productType,
+                        imageUrl: imageUrl // Save the image URL
+                    });
+                    showToast(`Produk "${productName}" berhasil ditambahkan!`);
+                    addProductForm.reset(); // Clear form
+                    updateProductPrice(); // Reset price input to default for new entry
+                    loadProducts(); // Reload products to show the new one
+                } catch (error) {
+                    console.error("Error adding product: ", error);
+                    showToast("Gagal menambahkan produk. Silakan coba lagi.");
+                }
+            });
+
             // Inisialisasi tampilan
             addExampleProducts(); // Add example products if not exist
             loadProducts(); // Load products from Firebase
             updateCartDisplay();
             renderCalendar();
             updateSalesSummary();
+            updateProductPrice(); // Set initial price for add product form
         });
     </script>
 </body>
