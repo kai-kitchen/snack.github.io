@@ -904,6 +904,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc, addDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
 
         // Your web app's Firebase configuration
@@ -920,6 +921,63 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app); // Get Firestore instance
         const storage = getStorage(app); // Get Storage instance
+        const auth = getAuth(app); // Get Auth instance
+
+        // Define the allowed UID
+        const ALLOWED_UID = 'fYi6XfX2I5On1Ny6wWKCT528sAj1';
+        let currentUserUID = null; // To store the authenticated user's UID
+
+        // Function to handle authentication
+        async function authenticateUser() {
+            try {
+                // Enable Anonymous Auth in Firebase Console -> Authentication -> Sign-in method
+                const userCredential = await signInAnonymously(auth);
+                currentUserUID = userCredential.user.uid;
+                console.log("Authenticated anonymously with UID:", currentUserUID);
+
+                if (currentUserUID !== ALLOWED_UID) {
+                    console.warn("Warning: Authenticated user UID does not match the allowed UID for write operations.");
+                    showToast("Anda tidak memiliki izin untuk menambah/menghapus produk.");
+                    // Optionally disable add/delete product forms/buttons here
+                    document.getElementById('add-product-form').style.display = 'none';
+                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'none');
+                } else {
+                    console.log("Authenticated user UID matches allowed UID. Full access granted.");
+                    // Ensure forms/buttons are visible if they were hidden
+                    document.getElementById('add-product-form').style.display = 'block';
+                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'flex'); // Assuming flex for delete-icon
+                }
+            } catch (error) {
+                console.error("Error during anonymous authentication:", error);
+                showToast("Gagal mengautentikasi. Fitur tambah/hapus produk mungkin tidak berfungsi.");
+                // Disable forms/buttons if authentication fails
+                document.getElementById('add-product-form').style.display = 'none';
+                document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'none');
+            }
+        }
+
+        // Listen for auth state changes (useful for real auth methods)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserUID = user.uid;
+                console.log("Auth state changed: User is signed in with UID:", currentUserUID);
+                if (currentUserUID !== ALLOWED_UID) {
+                    console.warn("Warning: Signed in user UID does not match the allowed UID for write operations.");
+                    showToast("Anda tidak memiliki izin untuk menambah/menghapus produk.");
+                    document.getElementById('add-product-form').style.display = 'none';
+                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'none');
+                } else {
+                    document.getElementById('add-product-form').style.display = 'block';
+                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'flex');
+                }
+            } else {
+                currentUserUID = null;
+                console.log("Auth state changed: No user is signed in.");
+                // If no user is signed in, try to authenticate anonymously
+                authenticateUser();
+            }
+        });
+
 
         document.addEventListener('DOMContentLoaded', function() {
             // Inisialisasi keranjang
@@ -1147,6 +1205,12 @@
             }
 
             async function handleDeleteProduct() {
+                // Check if current user has permission
+                if (currentUserUID !== ALLOWED_UID) {
+                    showToast("Anda tidak memiliki izin untuk menghapus produk.");
+                    return;
+                }
+
                 const productId = this.getAttribute('data-id');
                 const imageUrl = this.getAttribute('data-image-url');
 
@@ -1527,6 +1591,12 @@
             addProductForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
+                // Check if current user has permission
+                if (currentUserUID !== ALLOWED_UID) {
+                    showToast("Anda tidak memiliki izin untuk menambah produk.");
+                    return;
+                }
+
                 const productName = document.getElementById('product-name').value;
                 // Ambil harga dari input hidden
                 const productPrice = parseInt(productPriceInput.value);
@@ -1581,6 +1651,9 @@
             renderCalendar();
             updateSalesSummary();
             updateProductPrice(); // Set initial price for add product form
+
+            // Initial authentication attempt
+            authenticateUser();
         });
     </script>
 </body>
