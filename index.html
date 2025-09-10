@@ -796,7 +796,16 @@
                         <label for="product-image-upload">Upload Foto Produk:</label>
                         <input type="file" id="product-image-upload" accept="image/*">
                     </div>
-                    <button type="submit" class="add-product-btn">Tambahkan Produk</button>
+                    <button type="submit" class="add-product-btn" id="add-product-submit-btn">
+                        <span id="add-product-btn-text">Tambahkan Produk</span>
+                        <span id="add-product-loading-spinner" style="display:none;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-left: 5px;">
+                                <style>.spinner_ajPY{transform-origin:center;animation:spinner_Aitg .75s infinite linear}@keyframes spinner_Aitg{100%{transform:rotate(360deg)}}</style>
+                                <path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" opacity=".25"/>
+                                <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.54,1.54,0,0,0,12,2.47,1.49,1.49,0,0,0,10.14,1.16Z" class="spinner_ajPY"/>
+                            </svg>
+                        </span>
+                    </button>
                 </form>
             </section>
         </div>
@@ -931,6 +940,12 @@
             const cartPopup = document.getElementById('cart-popup');
             const cartOverlay = document.getElementById('cart-overlay');
             const closeCartBtn = document.getElementById('close-cart-btn');
+
+            // Elements for loading spinner
+            const addProductSubmitBtn = document.getElementById('add-product-submit-btn');
+            const addProductBtnText = document.getElementById('add-product-btn-text');
+            const addProductLoadingSpinner = document.getElementById('add-product-loading-spinner');
+
 
             // Data penjualan (disimpan di localStorage)
             let salesData = JSON.parse(localStorage.getItem('salesData')) || {};
@@ -1523,6 +1538,11 @@
                     return;
                 }
 
+                // Tampilkan loading spinner
+                addProductBtnText.style.display = 'none';
+                addProductLoadingSpinner.style.display = 'inline-block';
+                addProductSubmitBtn.disabled = true; // Nonaktifkan tombol selama proses
+
                 try {
                     let imageUrl = '';
                     if (imageFile) {
@@ -1546,6 +1566,11 @@
                 } catch (error) {
                     console.error("Error adding product: ", error);
                     showToast("Gagal menambahkan produk. Silakan coba lagi.");
+                } finally {
+                    // Sembunyikan loading spinner dan aktifkan kembali tombol
+                    addProductBtnText.style.display = 'inline';
+                    addProductLoadingSpinner.style.display = 'none';
+                    addProductSubmitBtn.disabled = false;
                 }
             });
 
