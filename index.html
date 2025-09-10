@@ -700,6 +700,78 @@
             display: none;
         }
 
+        /* Login Container Styles */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Lebih tinggi dari cart-overlay */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .login-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .login-container.active .login-box {
+            transform: translateY(0);
+        }
+
+        .login-box .section-title {
+            margin-bottom: 25px;
+            font-size: 22px;
+        }
+
+        .login-box .section-title::after {
+            margin: 8px auto;
+        }
+
+        .login-box .form-group {
+            text-align: left;
+        }
+
+        .login-box .add-product-btn {
+            margin-top: 20px;
+        }
+
+        .register-text {
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .register-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .register-text a:hover {
+            text-decoration: underline;
+        }
+
+
         @media (max-width: 768px) {
             .products-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -733,6 +805,23 @@
                 font-size: 20px;
                 top: 10px;
                 right: 10px;
+            }
+
+            /* Mobile-specific adjustments for tabs */
+            .tabs {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .tab {
+                margin-right: 0;
+                margin-bottom: 5px;
+                border-radius: 5px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .tab.active {
+                border-bottom: 1px solid white; /* Adjust active tab border for mobile */
             }
         }
     </style>
@@ -875,6 +964,39 @@
         </div>
     </main>
 
+    <!-- Bagian Login -->
+    <div class="login-container" id="login-container">
+        <div class="login-box">
+            <h2 class="section-title">Login ke TokoOnline</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email:</label>
+                    <input type="email" id="login-email" placeholder="Masukkan email Anda" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password:</label>
+                    <input type="password" id="login-password" placeholder="Masukkan password Anda" required>
+                </div>
+                <button type="submit" class="add-product-btn" id="login-btn">Login</button>
+                <p class="register-text">Belum punya akun? <a href="#" id="show-register">Daftar di sini</a></p>
+            </form>
+
+            <form id="register-form" style="display:none;">
+                <h2 class="section-title">Daftar Akun Baru</h2>
+                <div class="form-group">
+                    <label for="register-email">Email:</label>
+                    <input type="email" id="register-email" placeholder="Masukkan email Anda" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password:</label>
+                    <input type="password" id="register-password" placeholder="Buat password (min. 6 karakter)" required>
+                </div>
+                <button type="submit" class="add-product-btn" id="register-btn">Daftar</button>
+                <p class="register-text">Sudah punya akun? <a href="#" id="show-login">Login di sini</a></p>
+            </form>
+        </div>
+    </div>
+
     <div id="toast-notification" class="toast-notification"></div>
 
     <!-- Pop-up Keranjang Belanja -->
@@ -904,7 +1026,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc, addDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
 
 
         // Your web app's Firebase configuration
@@ -923,58 +1045,129 @@
         const storage = getStorage(app); // Get Storage instance
         const auth = getAuth(app); // Get Auth instance
 
-        // Define the allowed UID
-        const ALLOWED_UID = 'fYi6XfX2I5On1Ny6wWKCT528sAj1';
+        // Define the allowed UID for admin access
+        const ADMIN_UID = 'fYi6XfX2I5On1Ny6wWKCT528sAj1'; // Ganti dengan UID admin yang sebenarnya dari Firebase Console
         let currentUserUID = null; // To store the authenticated user's UID
 
-        // Function to handle authentication
-        async function authenticateUser() {
-            try {
-                // Enable Anonymous Auth in Firebase Console -> Authentication -> Sign-in method
-                const userCredential = await signInAnonymously(auth);
-                currentUserUID = userCredential.user.uid;
-                console.log("Authenticated anonymously with UID:", currentUserUID);
+        // --- Elemen UI Login ---
+        const loginContainer = document.getElementById('login-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
+        const registerEmailInput = document.getElementById('register-email');
+        const registerPasswordInput = document.getElementById('register-password');
+        const showRegisterLink = document.getElementById('show-register');
+        const showLoginLink = document.getElementById('show-login');
 
-                if (currentUserUID !== ALLOWED_UID) {
-                    console.warn("Warning: Authenticated user UID does not match the allowed UID for write operations.");
-                    showToast("Anda tidak memiliki izin untuk menambah/menghapus produk.");
-                    // Optionally disable add/delete product forms/buttons here
-                    document.getElementById('add-product-form').style.display = 'none';
-                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'none');
-                } else {
-                    console.log("Authenticated user UID matches allowed UID. Full access granted.");
-                    // Ensure forms/buttons are visible if they were hidden
-                    document.getElementById('add-product-form').style.display = 'block';
-                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'flex'); // Assuming flex for delete-icon
-                }
-            } catch (error) {
-                console.error("Error during anonymous authentication:", error);
-                showToast("Gagal mengautentikasi. Fitur tambah/hapus produk mungkin tidak berfungsi.");
-                // Disable forms/buttons if authentication fails
-                document.getElementById('add-product-form').style.display = 'none';
-                document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'none');
+        // --- Fungsi Autentikasi ---
+
+        // Fungsi untuk menampilkan/menyembunyikan UI utama dan UI login
+        function toggleMainUI(show) {
+            const mainContent = document.querySelector('main.container');
+            const header = document.querySelector('header');
+            if (show) {
+                mainContent.style.display = 'block';
+                header.style.display = 'flex'; // Header biasanya flex
+                loginContainer.classList.remove('active'); // Sembunyikan login dengan transisi
+            } else {
+                mainContent.style.display = 'none';
+                header.style.display = 'none';
+                loginContainer.classList.add('active'); // Tampilkan login dengan transisi
             }
         }
 
-        // Listen for auth state changes (useful for real auth methods)
+        // Event listener untuk menampilkan form register
+        showRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        });
+
+        // Event listener untuk menampilkan form login
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+
+        // Handle Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast("Login berhasil!");
+                // UI akan diperbarui oleh onAuthStateChanged
+            } catch (error) {
+                console.error("Error during login:", error);
+                let errorMessage = "Login gagal. Silakan coba lagi.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = "Email atau password salah.";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = "Format email tidak valid.";
+                }
+                showToast(errorMessage);
+            }
+        });
+
+        // Handle Register
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showToast("Pendaftaran berhasil! Anda telah login.");
+                // UI akan diperbarui oleh onAuthStateChanged
+            } catch (error) {
+                console.error("Error during registration:", error);
+                let errorMessage = "Pendaftaran gagal. Silakan coba lagi.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "Email ini sudah terdaftar.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = "Password terlalu lemah (minimal 6 karakter).";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = "Format email tidak valid.";
+                }
+                showToast(errorMessage);
+            }
+        });
+
+        // --- Manajemen Status Autentikasi ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // Pengguna sudah login
                 currentUserUID = user.uid;
-                console.log("Auth state changed: User is signed in with UID:", currentUserUID);
-                if (currentUserUID !== ALLOWED_UID) {
-                    console.warn("Warning: Signed in user UID does not match the allowed UID for write operations.");
-                    showToast("Anda tidak memiliki izin untuk menambah/menghapus produk.");
-                    document.getElementById('add-product-form').style.display = 'none';
-                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'none');
+                console.log("User is signed in with UID:", currentUserUID);
+                toggleMainUI(true); // Tampilkan UI utama
+
+                // Sesuaikan akses berdasarkan UID admin
+                if (currentUserUID === ADMIN_UID) {
+                    console.log("Admin user detected. Full access granted.");
+                    document.querySelector('.tabs .tab[data-tab="add-product"]').style.display = 'flex'; // Pastikan tab tambah produk terlihat
+                    document.getElementById('add-product-tab').style.display = 'block';
+                    // Ikon delete akan diatur di loadProducts
                 } else {
-                    document.getElementById('add-product-form').style.display = 'block';
-                    document.querySelectorAll('.delete-icon').forEach(icon => icon.style.display = 'flex');
+                    console.log("Regular user detected. Limited access.");
+                    // Sembunyikan tab tambah produk dan ikon delete
+                    document.querySelector('.tabs .tab[data-tab="add-product"]').style.display = 'none';
+                    document.getElementById('add-product-tab').style.display = 'none';
+                    // Sembunyikan ikon delete pada produk yang sudah ada (akan diatur di loadProducts)
                 }
+                loadProducts(); // Muat ulang produk setelah status auth diketahui
             } else {
+                // Pengguna belum login
                 currentUserUID = null;
-                console.log("Auth state changed: No user is signed in.");
-                // If no user is signed in, try to authenticate anonymously
-                authenticateUser();
+                console.log("No user is signed in.");
+                toggleMainUI(false); // Tampilkan UI login
+                // Sembunyikan tab tambah produk dan ikon delete jika belum login
+                document.querySelector('.tabs .tab[data-tab="add-product"]').style.display = 'none';
+                document.getElementById('add-product-tab').style.display = 'none';
+                // Ikon delete akan diatur di loadProducts
             }
         });
 
@@ -1126,7 +1319,7 @@
                     const productCard = document.createElement('div');
                     productCard.classList.add('product-card');
                     productCard.innerHTML = `
-                        <div class="delete-icon" data-id="${product.id}" data-image-url="${product.imageUrl || ''}">
+                        <div class="delete-icon" data-id="${product.id}" data-image-url="${product.imageUrl || ''}" style="${currentUserUID === ADMIN_UID ? 'display: flex;' : 'display: none;'}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1206,7 +1399,7 @@
 
             async function handleDeleteProduct() {
                 // Check if current user has permission
-                if (currentUserUID !== ALLOWED_UID) {
+                if (currentUserUID !== ADMIN_UID) {
                     showToast("Anda tidak memiliki izin untuk menghapus produk.");
                     return;
                 }
@@ -1592,7 +1785,7 @@
                 e.preventDefault();
 
                 // Check if current user has permission
-                if (currentUserUID !== ALLOWED_UID) {
+                if (currentUserUID !== ADMIN_UID) {
                     showToast("Anda tidak memiliki izin untuk menambah produk.");
                     return;
                 }
@@ -1646,14 +1839,11 @@
 
             // Inisialisasi tampilan
             addExampleProducts(); // Add example products if not exist
-            loadProducts(); // Load products from Firebase
+            // loadProducts(); // Ini akan dipanggil oleh onAuthStateChanged
             updateCartDisplay();
             renderCalendar();
             updateSalesSummary();
             updateProductPrice(); // Set initial price for add product form
-
-            // Initial authentication attempt
-            authenticateUser();
         });
     </script>
 </body>
